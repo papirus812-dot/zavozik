@@ -1,0 +1,229 @@
+/* Дроны-доставщики «Завозика» в разделе «Доставка»: шесть над дорогой, по три с каждой стороны,
+   симметрично. Каждая пара — на своём расстоянии: у самого кадра (крупные, ниже), дальше — летят
+   впереди (меньше, выше, ближе к середине) и ещё дальше, у горизонта (совсем маленькие, в дымке).
+   Крутят винтами, покачиваются вразнобой, несут пакеты. Над холстом сцен (z-index 3). */
+
+.drones {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Слова о доставке: выходят из темноты в небе над дорогой, в «клине» дронов, приближаются
+   на месте и растворяются (chapters.js, initFlyby). Точка схода перспективы — там же, где слово,
+   поэтому оно только растёт и никуда не смещается. Под дронами (z-index 2): дроны — перед словами */
+.flyby {
+  --flyby-y: 27%;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+  perspective: 900px;
+  perspective-origin: 50% var(--flyby-y);
+}
+
+.flyby__item {
+  position: absolute;
+  top: var(--flyby-y);
+  left: 50%;
+  color: #fff;
+  font: 500 clamp(56px, 9vw, 150px)/1 var(--font-display);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  text-shadow: 0 0 40px rgba(141, 191, 91, 0.35), 0 4px 30px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, -50%) translateZ(-1500px);
+  will-change: transform, opacity, filter;
+}
+
+.flyby__logo {
+  width: clamp(240px, 30vw, 480px);
+  height: auto;
+  /* исходный логотип тёмно-оливковый — на тёмном осветляем, как в шапке */
+  filter: brightness(2.05) saturate(0.68) drop-shadow(0 6px 30px rgba(0, 0, 0, 0.5));
+}
+
+/* без анимаций — просто логотип */
+@media (prefers-reduced-motion: reduce) {
+  .flyby__logo {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.drone {
+  position: absolute;
+  top: var(--top);
+  width: var(--w);
+}
+
+.drone--left {
+  left: var(--x);
+}
+
+.drone--right {
+  right: var(--x);
+}
+
+/* ближние — поверх дальних */
+.drone--near {
+  --w: clamp(140px, 19vw, 290px);
+  --x: 3%;
+  --top: 34%;
+  --bob: 10px;
+  --float: 3.8s;
+  z-index: 3;
+  filter: drop-shadow(0 24px 26px rgba(0, 0, 0, 0.45));
+}
+
+.drone--mid {
+  --w: clamp(88px, 11vw, 170px);
+  --x: 19%;
+  --top: 21%;
+  --bob: 6px;
+  --float: 4.4s;
+  z-index: 2;
+  filter: brightness(0.9) drop-shadow(0 14px 16px rgba(0, 0, 0, 0.4));
+}
+
+.drone--far {
+  --w: clamp(54px, 6vw, 92px);
+  --x: 32%;
+  --top: 12%;
+  --bob: 3.5px;
+  --float: 5.1s;
+  z-index: 1;
+  filter: brightness(0.8) saturate(0.8) drop-shadow(0 8px 8px rgba(0, 0, 0, 0.35));
+}
+
+@media (max-width: 760px) {
+  .drone--near {
+    --w: 31vw;
+    --x: 2%;
+    --top: 30%;
+  }
+
+  .drone--mid {
+    --w: 18vw;
+    --x: 20%;
+    --top: 19%;
+  }
+
+  .drone--far {
+    --w: 10vw;
+    --x: 34%;
+    --top: 12%;
+  }
+}
+
+.drone__float {
+  animation: drone-hover var(--float, 3.8s) ease-in-out infinite;
+}
+
+/* вразнобой: у каждого дрона своя фаза качания */
+.drone--near.drone--right .drone__float { animation-delay: -1.3s; }
+.drone--mid.drone--left .drone__float { animation-delay: -0.6s; }
+.drone--mid.drone--right .drone__float { animation-delay: -2.7s; }
+.drone--far.drone--left .drone__float { animation-delay: -1.9s; }
+.drone--far.drone--right .drone__float { animation-delay: -3.6s; }
+
+.drone__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* Винты: лопасть «поворачивается» — её видимая длина ходит от полной до нуля и обратно;
+   вторая лопасть сдвинута на четверть оборота */
+.drone__blade {
+  fill: #1f2519;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: drone-blade 0.16s linear infinite;
+}
+
+.drone__blade--b {
+  animation-delay: -0.04s;
+}
+
+.drone__rotor--back .drone__blade {
+  fill: #3a4230;
+  opacity: 0.8;
+}
+
+.drone__disc {
+  animation: drone-disc 0.18s steps(2) infinite;
+}
+
+.drone__led {
+  animation: drone-led 1.6s steps(1) infinite;
+}
+
+.drone__led--late {
+  animation-delay: 0.8s;
+}
+
+/* пакет качается маятником на тросе */
+.drone__cargo {
+  transform-box: view-box;
+  transform-origin: 160px 99px;
+  animation: drone-cargo var(--float, 3.8s) ease-in-out infinite;
+}
+
+.drones.is-offscreen .drone__float,
+.drones.is-offscreen .drone__blade,
+.drones.is-offscreen .drone__disc,
+.drones.is-offscreen .drone__led,
+.drones.is-offscreen .drone__cargo {
+  animation-play-state: paused;
+}
+
+@keyframes drone-hover {
+  0%, 100% { transform: translateY(0) rotate(-1.4deg); }
+  50% { transform: translateY(calc(-1 * var(--bob, 10px))) rotate(1.2deg); }
+}
+
+@keyframes drone-blade {
+  0% { transform: scaleX(1); }
+  25% { transform: scaleX(0.05); }
+  50% { transform: scaleX(-1); }
+  75% { transform: scaleX(-0.05); }
+  100% { transform: scaleX(1); }
+}
+
+@keyframes drone-disc {
+  from { opacity: 0.85; }
+  to { opacity: 1; }
+}
+
+@keyframes drone-led {
+  0% { opacity: 1; }
+  12% { opacity: 0.15; }
+  24% { opacity: 1; }
+}
+
+@keyframes drone-cargo {
+  0%, 100% { transform: rotate(2.4deg); }
+  50% { transform: rotate(-2.4deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drone__float,
+  .drone__cargo,
+  .drone__disc,
+  .drone__led {
+    animation: none;
+  }
+
+  .drone__blade {
+    animation: none;
+  }
+
+  .drone__blade--b {
+    transform: scaleX(0.35);
+  }
+}

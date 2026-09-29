@@ -1,0 +1,159 @@
+/* Лупа над фото товаров (loupe.js): стекло с «молекулярным составом» товара, металлическая
+   оправа и деревянная ручка. Центр линзы — там, где указатель; саму лупу мышь «не чувствует». */
+
+.loupe {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 70;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.loupe__body {
+  --d: 200px;
+  position: relative;
+  width: var(--d);
+  height: var(--d);
+  opacity: 0;
+  transform: scale(0.6);
+  transform-origin: 50% 50%;
+  transition: opacity 0.18s ease, transform 0.26s cubic-bezier(0.2, 0.9, 0.25, 1.2);
+  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.42));
+}
+
+.loupe.is-on .loupe__body {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.loupe.is-on.is-press .loupe__body {
+  transform: scale(0.95);
+}
+
+.loupe__lens {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #f2f2ee;
+}
+
+.loupe__layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.loupe__layer .lp-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* подписи и атомы — шрифтом сайта; светлая «подложка» вокруг букв, чтобы читались поверх линий */
+.loupe__layer text {
+  font-family: var(--font-ui);
+  paint-order: stroke;
+  stroke: var(--lp-tint, #f2f2ee);
+  stroke-width: 2.4px;
+  stroke-linejoin: round;
+}
+
+.loupe__layer .mol__atoms text {
+  font-weight: 500;
+}
+
+.loupe__layer .mol__name {
+  fill: #16211b;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.loupe__layer .mol__formula {
+  fill: #3f5046;
+  font-weight: 500;
+}
+
+.loupe__layer .mol__note {
+  fill: #4b5a50;
+}
+
+.loupe__layer .lp-water {
+  stroke: #1c2821;
+  stroke-opacity: 0.35;
+  stroke-width: 0.8;
+  fill: #f7f7f3;
+  opacity: 0.55;
+}
+
+/* стекло: блик сверху слева, лёгкое затемнение к краю — выпуклая линза */
+.loupe__glass {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(120% 90% at 28% 18%, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.1) 20%, rgba(255, 255, 255, 0) 38%),
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 60%, rgba(18, 26, 20, 0.3) 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35), inset 0 0 22px rgba(0, 0, 0, 0.22);
+}
+
+.loupe__frame {
+  position: absolute;
+  z-index: 2;
+  max-width: none;                       /* общее правило для svg сжало бы оправу до ширины линзы */
+  max-height: none;
+  overflow: visible;
+}
+
+/* «Открыть» — под линзой, как раньше подпись у курсора */
+.loupe__hint {
+  position: absolute;
+  z-index: 3;
+  top: calc(100% + 16px);
+  left: 50%;
+  translate: -50% 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--bg);
+  font: 500 13px/1 var(--font-ui);
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.loupe__hint[hidden] {
+  display: none;
+}
+
+/* подсказка про лупу в главах каталога — только там, где есть мышь */
+.loupe-note {
+  display: none;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .loupe-note {
+    display: block;
+  }
+}
+
+/* над фото вместо стрелки — сама лупа */
+.is-looking,
+.is-looking * {
+  cursor: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loupe__body {
+    transition: opacity 0.12s linear;
+    transform: none;
+  }
+
+  .loupe.is-on .loupe__body,
+  .loupe.is-on.is-press .loupe__body {
+    transform: none;
+  }
+}

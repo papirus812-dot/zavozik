@@ -1,0 +1,53 @@
+/* Общие токены и сброс — подключается на всех страницах */
+
+:root {
+  /* Цвета бренда взяты из логотипа */
+  --milk: #FEFDF9;        /* фон логотипа — «молочная» бумага */
+  --ink: #434F2B;         /* оливковые буквы логотипа: текст, контуры */
+  --meadow: #606B43;      /* дуга и слоган логотипа */
+
+  --font-display: 'Vollkorn', Georgia, 'Times New Roman', serif;
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--milk);
+  color: var(--ink);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Плавная смена страниц в браузерах, которые это умеют */
+@view-transition {
+  navigation: auto;
+}

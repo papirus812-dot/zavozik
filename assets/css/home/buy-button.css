@@ -1,0 +1,124 @@
+/* Кнопка «В корзину» — одна на весь сайт: карточки каталога, товар недели, карточка товара.
+   По коду кнопки со звёздами с Uiverse.io (MuhammadHasann); цвет подсветки — зелёный сайта
+   (#8dbf5b) вместо персикового #fec195, звёзды — прежние кремовые.
+   В покое — сплошная зелёная кнопка. «Зажжённая» (наведение мышью, фокус с клавиатуры и короткое
+   «Добавлено» после нажатия) — контур со свечением, из-под кнопки вылетают шесть звёздочек.
+   Звёзды спрятаны под заливкой: заливка — отдельный слой ::before, кнопка — свой контекст
+   наложения (isolation), так что фон карточки или окна их не перекрывает и не открывает.
+   Состояние «зажжена» — одна переменная --lit (0/1), от неё считаются цвет, свечение и звёзды. */
+
+/* спрайт со звездой (home.html) — вне потока страницы */
+.sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.buy-button {
+  --buy: var(--accent);                       /* подсветка: #8dbf5b */
+  --buy-glow: rgba(var(--accent-rgb), 0.55);  /* она же с прозрачностью 8c */
+  --lit: 0;
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 35px;
+  border: 3px solid var(--buy);
+  border-radius: 8px;
+  background: transparent;
+  color: color-mix(in srgb, var(--buy) calc(var(--lit) * 100%), #181818);
+  font: 500 17px/1.2 var(--font-ui);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  box-shadow: 0 0 calc(var(--lit) * 25px) var(--buy-glow);
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+/* заливка — над звёздами: пока кнопка не зажжена, звёзды лежат под ней */
+.buy-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 5px;
+  background: var(--buy);
+  opacity: calc(1 - var(--lit));
+  transition: opacity 0.3s ease-in-out;
+}
+
+.buy-button:focus-visible,
+.buy-button.is-added {
+  --lit: 1;
+}
+
+/* на сенсорных экранах наведения нет: там кнопку зажигает само нажатие («Добавлено») */
+@media (hover: hover) {
+  .buy-button:hover {
+    --lit: 1;
+  }
+}
+
+/* ---------- Звёзды: из-под кнопки — наружу ---------- */
+.buy-button__star {
+  position: absolute;
+  z-index: -5;
+  top: calc(var(--y0) + (var(--y1) - var(--y0)) * var(--lit));
+  left: calc(var(--x0) + (var(--x1) - var(--x0)) * var(--lit));
+  height: auto;
+  aspect-ratio: 784.11 / 815.53;
+  fill: #fffdef;
+  filter: drop-shadow(0 0 calc(var(--lit) * 10px) #fffdef);
+  pointer-events: none;
+}
+
+.buy-button__star--1 {
+  --x0: 20%; --y0: 20%; --x1: -30%; --y1: -80%;
+  width: 25px;
+  transition: all 1s cubic-bezier(0.05, 0.83, 0.43, 0.96);
+}
+
+.buy-button__star--2 {
+  --x0: 45%; --y0: 45%; --x1: 10%; --y1: -25%;
+  width: 15px;
+  transition: all 1s cubic-bezier(0, 0.4, 0, 1.01);
+}
+
+.buy-button__star--3 {
+  --x0: 40%; --y0: 40%; --x1: 25%; --y1: 55%;
+  width: 5px;
+  transition: all 1s cubic-bezier(0, 0.4, 0, 1.01);
+}
+
+.buy-button__star--4 {
+  --x0: 40%; --y0: 20%; --x1: 80%; --y1: 30%;
+  width: 8px;
+  transition: all 0.8s cubic-bezier(0, 0.4, 0, 1.01);
+}
+
+.buy-button__star--5 {
+  --x0: 45%; --y0: 25%; --x1: 115%; --y1: 25%;
+  width: 15px;
+  transition: all 0.6s cubic-bezier(0, 0.4, 0, 1.01);
+}
+
+.buy-button__star--6 {
+  --x0: 50%; --y0: 5%; --x1: 60%; --y1: 5%;
+  width: 5px;
+  transition: all 0.8s ease;
+}
+
+/* в карточке кнопка всегда справа — и рядом с ценой, и когда длинная цена со скидкой переносит её вниз */
+.product__buy .buy-button {
+  margin-left: auto;
+}
+
+/* узкие карточки на телефоне: кнопка во всю ширину под ценой, поля поменьше — подпись в одну строку */
+@media (max-width: 760px) {
+  .product__buy .buy-button {
+    flex: 1 1 100%;
+    padding-inline: 12px;
+  }
+}

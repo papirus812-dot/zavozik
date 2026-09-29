@@ -1,0 +1,266 @@
+/* Вход на сайт: жидкометаллический шар с логотипом на чёрном фоне */
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Под заставкой — чёрный: шар растворяется в темноте, и из неё же проявляется главная страница */
+html,
+body {
+  background: #000;
+}
+
+.splash {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  /* cqmin — от меньшей стороны экрана, как и размер шара: по ним стоят стрелки */
+  container-type: size;
+  transition: opacity 0.7s cubic-bezier(0.45, 0, 0.55, 1);
+
+  /* Статичная замена шара — только если шейдер недоступен */
+  --orb-static:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 28%),
+    radial-gradient(ellipse 48% 30% at 50% 50%, rgba(236, 236, 241, 0.95), rgba(236, 236, 241, 0) 100%),
+    radial-gradient(circle at 72% 82%, rgba(8, 8, 10, 0.85), rgba(8, 8, 10, 0) 40%),
+    linear-gradient(155deg, #f3f3f6 0%, #c4c4cb 38%, #6d6d74 62%, #16161a 84%, #bdbdc4 100%);
+}
+
+.splash.is-leaving {
+  opacity: 0;
+}
+
+.splash__stage {
+  position: absolute;
+  inset: 0;
+  container-type: size;
+  transform-origin: 50% 50%;
+  transition: transform 0.3s cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+/* По нажатию шар вместе с логотипом увеличивается на 5 % … */
+.splash.is-entering .splash__stage {
+  transform: scale(1.05);
+}
+
+/* … и, растворяясь в чёрном, продолжает медленно расти — будто камера входит в него */
+.splash.is-leaving .splash__stage {
+  transform: scale(1.1);
+  transition: transform 0.7s linear;
+}
+
+/* Холст ShaderMount (размеры дублируют его собственный стиль — на случай старых браузеров)
+   проявляется мягко, когда шейдер готов */
+.splash__stage canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+
+.splash.is-live .splash__stage canvas {
+  opacity: 1;
+}
+
+/* Кликабельная область точно по шару.
+   Диаметр шара в шейдере = 0.984 × scale (0.9) от меньшей стороны экрана. */
+.orb {
+  --d: 88.56vmin;
+  --d: 88.56cqmin;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--d);
+  height: var(--d);
+  margin: calc(var(--d) / -2) 0 0 calc(var(--d) / -2);
+  border-radius: 50%;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.orb:focus-visible {
+  box-shadow: 0 0 0 3px #000, 0 0 0 5px rgba(255, 255, 255, 0.85);
+}
+
+.splash.is-entering .orb {
+  cursor: default;
+  pointer-events: none;
+}
+
+.orb__logo {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 70%;
+  height: auto;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Шейдер недоступен: статичный шар, логотип, вход работает так же */
+.splash.is-fallback .orb {
+  background: var(--orb-static);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25), inset -18px -24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.splash.is-fallback .orb:focus-visible {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.25),
+    inset -18px -24px 60px rgba(0, 0, 0, 0.55),
+    0 0 0 3px #000,
+    0 0 0 5px rgba(255, 255, 255, 0.85);
+}
+
+.splash.is-fallback .orb__logo,
+.splash.is-fallback-logo .orb__logo {
+  display: block;
+}
+
+/* ---------- Подсказки: стрелки к шару и «НАЖМИ» в углах ----------
+   Раз в 10 секунд появляются, трижды быстро мигают и исчезают. Чисто белые, тонкие. */
+.hints {
+  --r: 44.28cqmin;                      /* радиус шара */
+  --gap: clamp(16px, 3cqmin, 34px);     /* от острия стрелки до шара */
+  /* длина стрелки: крупно, но не больше, чем позволяет место сбоку от шара */
+  --len: clamp(44px, min(22cqmin, (50cqw - var(--r) - var(--gap) - 16px) * 0.78), 190px);
+  --spread: 24deg;                      /* угол между соседними стрелками */
+  --edge: clamp(18px, 3.4cqmin, 40px);  /* отступ надписей от краёв экрана */
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash.is-live .hints,
+.splash.is-fallback .hints {
+  animation: hints-blink 10s steps(1, end) 1.2s infinite;
+}
+
+.splash.is-entering .hints {
+  animation: none;
+  opacity: 0;
+}
+
+/* Вкл 0,2 с — выкл 0,16 с — ×3, дальше темно до конца десятисекундного круга */
+@keyframes hints-blink {
+  0% { opacity: 1; }
+  2% { opacity: 0; }
+  3.6% { opacity: 1; }
+  5.6% { opacity: 0; }
+  7.2% { opacity: 1; }
+  9.2% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* Стрелки: одна и та же фигура, разложенная по дуге вокруг шара — остриё каждой смотрит в центр.
+   Слева углы 180° ± разнос, справа — зеркально 0° ± разнос: картинка строго симметрична. */
+.hint-arrow {
+  --dist: calc(var(--r) + var(--gap) + var(--len) / 2);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--len);
+  height: calc(var(--len) / 5);
+  overflow: visible;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* из центра шара — повернуть на угол --a, отойти на --dist и развернуться остриём к шару */
+  transform: translate(-50%, -50%) rotate(var(--a)) translateX(var(--dist)) rotate(180deg);
+}
+
+.hint-arrow path {
+  vector-effect: non-scaling-stroke;
+}
+
+.hint-arrow--a1 { --a: calc(180deg + var(--spread)); }
+.hint-arrow--a2 { --a: 180deg; }
+.hint-arrow--a3 { --a: calc(180deg - var(--spread)); }
+.hint-arrow--b1 { --a: calc(0deg - var(--spread)); }
+.hint-arrow--b2 { --a: 0deg; }
+.hint-arrow--b3 { --a: var(--spread); }
+
+/* Вертикальный экран: по бокам от шара места нет — стрелки сверху и снизу, так же по три */
+@media (max-aspect-ratio: 1/1) {
+  .hints {
+    --len: clamp(44px, min(22cqmin, (50cqh - var(--r) - var(--gap) - 16px) * 0.78), 190px);
+  }
+
+  .hint-arrow--a1 { --a: calc(270deg - var(--spread)); }
+  .hint-arrow--a2 { --a: 270deg; }
+  .hint-arrow--a3 { --a: calc(270deg + var(--spread)); }
+  .hint-arrow--b1 { --a: calc(90deg + var(--spread)); }
+  .hint-arrow--b2 { --a: 90deg; }
+  .hint-arrow--b3 { --a: calc(90deg - var(--spread)); }
+}
+
+.hint-corner {
+  position: absolute;
+  color: #fff;
+  font-family: 'Wix Madefor Text', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  font-size: clamp(18px, 1.5vw + 9px, 38px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.hint-corner--tl {
+  top: calc(var(--edge) + env(safe-area-inset-top));
+  left: calc(var(--edge) + env(safe-area-inset-left));
+}
+
+.hint-corner--tr {
+  top: calc(var(--edge) + env(safe-area-inset-top));
+  right: calc(var(--edge) + env(safe-area-inset-right));
+  margin-right: -0.26em; /* разрядка после последней буквы — края симметричны */
+}
+
+.hint-corner--bl {
+  bottom: calc(var(--edge) + env(safe-area-inset-bottom));
+  left: calc(var(--edge) + env(safe-area-inset-left));
+}
+
+.hint-corner--br {
+  bottom: calc(var(--edge) + env(safe-area-inset-bottom));
+  right: calc(var(--edge) + env(safe-area-inset-right));
+  margin-right: -0.26em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash {
+    transition-duration: 0.25s;
+  }
+
+  .splash__stage,
+  .splash__stage canvas {
+    transition: none;
+  }
+
+  .splash.is-entering .splash__stage,
+  .splash.is-leaving .splash__stage {
+    transform: none;
+  }
+
+  /* без мигания: подсказки просто видны */
+  .splash.is-live .hints,
+  .splash.is-fallback .hints {
+    animation: none;
+    opacity: 1;
+  }
+
+  .splash.is-entering .hints {
+    opacity: 0;
+  }
+}

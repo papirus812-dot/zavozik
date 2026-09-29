@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Завозик — натуральное молоко</title>
+  <meta name="description" content="Завозик — натуральное молоко. Ближе к хорошему.">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+
+  <link rel="preload" as="image" href="assets/img/logo-zavozik-texture.png">
+  <!-- Шрифт надписей «НАЖМИ» — тот же, что в меню сайта -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Wix+Madefor+Text:wght@600&display=swap">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/intro.css">
+
+  <!-- Шар — оригинальный шейдер LiquidMetal из @paper-design/shaders 0.0.46 (MIT) -->
+  <script src="assets/vendor/paper-shaders/paper-shaders.js" defer></script>
+  <script src="assets/js/intro.js" defer></script>
+
+  <noscript>
+    <style>
+      .orb { background: var(--orb-static); }
+      .orb__logo { display: block; }
+    </style>
+  </noscript>
+</head>
+<body>
+
+  <main class="splash" id="splash">
+    <h1 class="visually-hidden">Завозик — натуральное молоко</h1>
+
+    <!-- Сюда ShaderMount добавляет холст с шаром -->
+    <div class="splash__stage" id="stage">
+      <!-- Весь шар — ссылка на основной сайт. Логотип в обычном режиме нарисован шейдером,
+           картинка ниже видна только если шейдер недоступен. -->
+      <a class="orb" id="orb" href="home.html" aria-label="Войти на сайт «Завозик»">
+        <img class="orb__logo" src="assets/img/logo-zavozik-texture.png" width="1173" height="387" alt="" decoding="async">
+      </a>
+    </div>
+
+    <!-- Подсказки: по три стрелки с каждой стороны, все смотрят в центр шара, и «НАЖМИ» в углах.
+         Раз в 10 секунд появляются, трижды мигают и исчезают (intro.css) -->
+    <div class="hints" aria-hidden="true">
+      <svg class="hint-arrow hint-arrow--a1" viewBox="0 0 120 24" focusable="false"><path d="M1 12H118M103 3L118 12L103 21"/></svg>
+      <svg class="hint-arrow hint-arrow--a2" viewBox="0 0 120 24" focusable="false"><path d="M1 12H118M103 3L118 12L103 21"/></svg>
+      <svg class="hint-arrow hint-arrow--a3" viewBox="0 0 120 24" focusable="false"><path d="M1 12H118M103 3L118 12L103 21"/></svg>
+      <svg class="hint-arrow hint-arrow--b1" viewBox="0 0 120 24" focusable="false"><path d="M1 12H118M103 3L118 12L103 21"/></svg>
+      <svg class="hint-arrow hint-arrow--b2" viewBox="0 0 120 24" focusable="false"><path d="M1 12H118M103 3L118 12L103 21"/></svg>
+      <svg class="hint-arrow hint-arrow--b3" viewBox="0 0 120 24" focusable="false"><path d="M1 12H118M103 3L118 12L103 21"/></svg>
+      <span class="hint-corner hint-corner--tl">Нажми</span>
+      <span class="hint-corner hint-corner--tr">Нажми</span>
+      <span class="hint-corner hint-corner--bl">Нажми</span>
+      <span class="hint-corner hint-corner--br">Нажми</span>
+    </div>
+  </main>
+
+</body>
+</html>

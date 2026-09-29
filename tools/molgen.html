@@ -1,0 +1,91 @@
+<!doctype html>
+<!--
+  Генератор данных для лупы над фото товаров (assets/js/home/molecules.js). Не часть сайта.
+  Берёт формулы молекул (SMILES) из window.MOLGEN_LIST, раскладывает их на плоскости библиотекой
+  RDKit (RDKit_minimal, BSD) и отдаёт компактные координаты атомов и связей: [[x, y, элемент,
+  заряд, водороды], ...] и [[a, b, порядок, клин], ...]. Длина связи приведена к 1.
+  Запуск: открыть через tools/serve.js и вызвать в консоли await molgen(list).
+-->
+<meta charset="utf-8">
+<title>molgen</title>
+<script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
+<script>
+  const VALENCE = { C: 4, N: 3, O: 2, S: 2, P: 5, Cl: 1, F: 1, Br: 1, I: 1 };
+
+  function parseMolblock(mb) {
+    const lines = mb.split('\n');
+    const counts = lines[3];
+    const na = parseInt(counts.slice(0, 3), 10), nb = parseInt(counts.slice(3, 6), 10);
+    const atoms = [], bonds = [];
+    for (let i = 0; i < na; i++) {
+      const l = lines[4 + i];
+      atoms.push({ x: parseFloat(l.slice(0, 10)), y: parseFloat(l.slice(10, 20)), el: l.slice(31, 34).trim(), chg: 0 });
+    }
+    for (let i = 0; i < nb; i++) {
+      const l = lines[4 + na + i];
+      bonds.push([parseInt(l.slice(0, 3), 10) - 1, parseInt(l.slice(3, 6), 10) - 1, parseInt(l.slice(6, 9), 10), parseInt(l.slice(9, 12), 10) || 0]);
+    }
+    for (const l of lines.slice(4 + na + nb)) {
+      if (!l.startsWith('M  CHG')) continue;
+      const f = l.slice(6).trim().split(/\s+/).map(Number);
+      for (let k = 0; k < f[0]; k++) atoms[f[1 + k * 2] - 1].chg = f[2 + k * 2];
+    }
+    return { atoms, bonds };
+  }
+
+  function compact({ atoms, bonds }) {
+    // длина связи → 1, центр → 0, y вниз (как в SVG)
+    let sum = 0;
+    for (const [a, b] of bonds) sum += Math.hypot(atoms[a].x - atoms[b].x, atoms[a].y - atoms[b].y);
+    const L = bonds.length ? sum / bonds.length : 1;
+    const xs = atoms.map((a) => a.x), ys = atoms.map((a) => a.y);
+    const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+    const order = atoms.map(() => 0);
+    for (const [a, b, o] of bonds) { order[a] += o; order[b] += o; }
+    const r = (v) => Math.round(v * 100) / 100;
+    return {
+      a: atoms.map((t, i) => {
+        const v = VALENCE[t.el];
+        let h = 0;
+        if (v !== undefined && t.el !== 'C') {
+          // заряд меняет валентность: O⁻ — 1, O⁺ — 3, N⁺ — 4
+          const val = t.el === 'N' || t.el === 'P' ? v + t.chg : v - Math.abs(t.chg) + (t.chg > 0 ? 2 * t.chg : 0);
+          h = Math.max(0, val - order[i]);
+          if (t.el === 'P') h = Math.max(0, (order[i] > 3 ? 5 : 3) - order[i]);
+        }
+        return [r((t.x - cx) / L), r(-(t.y - cy) / L), t.el, t.chg, h];
+      }),
+      b: bonds,
+    };
+  }
+
+  // SMILES по названию из PubChem (с пространственным строением, где оно есть)
+  window.pubchem = async function (names) {
+    const out = {};
+    for (const [id, name] of names) {
+      try {
+        const r = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(name)}/property/SMILES,IUPACName/JSON`);
+        const p = (await r.json()).PropertyTable.Properties[0];
+        out[id] = { cid: p.CID, smiles: p.SMILES, iupac: p.IUPACName };
+      } catch (e) {
+        out[id] = { error: String(e) };
+      }
+    }
+    return out;
+  };
+
+  window.molgen = async function (list) {
+    const RDKit = await window.initRDKitModule({ locateFile: () => 'https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.wasm' });
+    if (RDKit.prefer_coordgen) RDKit.prefer_coordgen(true);
+    const out = {}, tags = {};
+    for (const [id, smi] of list) {
+      const mol = RDKit.get_mol(smi);
+      if (!mol || !mol.is_valid()) { out[id] = { error: smi }; continue; }
+      mol.set_new_coords(true);
+      out[id] = compact(parseMolblock(mol.get_molblock()));
+      if (mol.get_stereo_tags) tags[id] = mol.get_stereo_tags();
+      mol.delete();
+    }
+    return { out, tags, version: RDKit.version() };
+  };
+</script>

@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Завозик — натуральное молоко</title>
+  <meta name="description" content="Завозик — натуральное молоко и сыры. Ближе к хорошему.">
+  <meta name="theme-color" content="#080a07">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <script>
+    document.documentElement.classList.add('js');
+    // Пришли с заставки — страница проявится из чёрного, продолжая переход (layout.css, .from-splash)
+    try {
+      if (sessionStorage.getItem('zavozik:from-splash')) {
+        sessionStorage.removeItem('zavozik:from-splash');
+        document.documentElement.classList.add('from-splash');
+      }
+    } catch (e) {}
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Wix+Madefor+Display:wght@400;500&family=Wix+Madefor+Text:wght@400;500;600&display=swap">
+  <!-- 3D: Three.js с CDN (сцены глав); без него страница работает, остаются запасные фоны -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js">
+
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/home/layout.css">
+  <link rel="stylesheet" href="assets/css/home/header.css">
+  <link rel="stylesheet" href="assets/css/home/hero.css">
+  <link rel="stylesheet" href="assets/css/home/drone.css">
+  <link rel="stylesheet" href="assets/css/home/chapters.css">
+  <link rel="stylesheet" href="assets/css/home/catalog.css">
+  <link rel="stylesheet" href="assets/css/home/info.css">
+  <link rel="stylesheet" href="assets/css/home/product.css">
+  <link rel="stylesheet" href="assets/css/home/cart.css">
+  <link rel="stylesheet" href="assets/css/home/buy-button.css">
+  <link rel="stylesheet" href="assets/css/home/marquee.css">
+  <link rel="stylesheet" href="assets/css/home/loupe.css">
+  <link rel="stylesheet" href="assets/css/home/production.css">
+  <link rel="stylesheet" href="assets/css/game/farm.css">
+
+  <!-- Компоненты страницы -->
+  <script src="assets/js/home/products.js" defer></script>
+  <script src="assets/js/home/cart-store.js" defer></script>
+  <script src="assets/js/home/header.js" defer></script>
+  <script src="assets/js/home/catalog.js" defer></script>
+  <script src="assets/js/home/product-dialog.js" defer></script>
+  <script src="assets/js/home/cart.js" defer></script>
+  <script src="assets/js/home/chapters.js" defer></script>
+  <script src="assets/js/home/hero-video.js" defer></script>
+  <script src="assets/js/home/hero-text.js" defer></script>
+  <script src="assets/js/home/molecules.js" defer></script>
+  <script src="assets/js/home/loupe.js" defer></script>
+  <script src="assets/js/home/farmer-image.js" defer></script>
+  <script src="assets/js/home/who-scene.js" defer></script>
+  <script src="assets/js/home/scenes.js" defer></script>
+  <script src="assets/js/home/plant-3d.js" defer></script>
+  <script src="assets/js/home/farm-loader.js" defer></script>
+  <script src="assets/js/home/main.js" defer></script>
+</head>
+<body class="page-home">
+  <a class="skip-link" href="#milk">Перейти к каталогу</a>
+
+  <!-- Общие части рисунков: звёздочка кнопок «В корзину» (buy-button.css) и градиенты дронов
+       в разделе «Доставка» (на них ссылаются все шесть дронов) -->
+  <svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <path id="buy-star" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"/>
+      <!-- символы бегущих строк (marquee.css): листок с логотипа и ромашка -->
+      <symbol id="sym-leaf" viewBox="0 0 100 100">
+        <path d="M20 90 C 8 58, 26 20, 90 8 C 98 46, 80 84, 20 90 Z" fill="currentColor"/>
+        <path d="M22 88 C 38 64, 58 38, 84 14" fill="none" style="stroke: var(--marquee-bg)" stroke-width="5" stroke-linecap="round"/>
+        <path d="M20 90 C 15 94, 10 96, 5 96" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="sym-flower" viewBox="0 0 100 100">
+        <g fill="currentColor">
+          <ellipse cx="50" cy="22" rx="9" ry="21"/>
+          <ellipse cx="50" cy="22" rx="9" ry="21" transform="rotate(36 50 50)"/>
+          <ellipse cx="50" cy="22" rx="9" ry="21" transform="rotate(72 50 50)"/>
+          <ellipse cx="50" cy="22" rx="9" ry="21" transform="rotate(108 50 50)"/>
+          <ellipse cx="50" cy="22" rx="9" ry="21" transform="rotate(144 50 50)"/>
+          <ellipse cx="50" cy="22" rx="9" ry="21" transform="rotate(180 50 50)"/>
+          <ellipse cx="50" cy="22" rx="9" ry="21" transform="rotate(216 50 50)"/>
+          <ellipse cx="50" cy="22" rx="9" ry="21" transform="rotate(252 50 50)"/>
+          <ellipse cx="50" cy="22" rx="9" ry="21" transform="rotate(288 50 50)"/>
+          <ellipse cx="50" cy="22" rx="9" ry="21" transform="rotate(324 50 50)"/>
+        </g>
+        <circle cx="50" cy="50" r="14" fill="#ffd45e"/>
+      </symbol>
+      <linearGradient id="drone-shell" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff"/>
+        <stop offset="0.55" stop-color="#f1efe6"/>
+        <stop offset="1" stop-color="#cfd3c4"/>
+      </linearGradient>
+      <linearGradient id="drone-dark" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#3a4230"/>
+        <stop offset="1" stop-color="#171b12"/>
+      </linearGradient>
+      <radialGradient id="drone-disc" cx="0.5" cy="0.5" r="0.5">
+        <stop offset="0" stop-color="#ffffff" stop-opacity="0.55"/>
+        <stop offset="0.7" stop-color="#ffffff" stop-opacity="0.22"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="drone-lens" cx="0.38" cy="0.35" r="0.7">
+        <stop offset="0" stop-color="#6f8f5a"/>
+        <stop offset="0.45" stop-color="#1c2616"/>
+        <stop offset="1" stop-color="#05070a"/>
+      </radialGradient>
+      <!-- пакет: зелёно-белые полосы под наклоном -->
+      <pattern id="drone-stripes" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+        <rect width="12" height="12" fill="#fbfaf3"/>
+        <rect width="6" height="12" fill="#6fa544"/>
+      </pattern>
+      <linearGradient id="drone-bag-shade" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#ffffff" stop-opacity="0.16"/>
+        <stop offset="0.45" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#0f1a08" stop-opacity="0.16"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <!-- 3D-сцены глав (частицы) рисуются здесь, поверх фонов и под панелями -->
+  <canvas class="scene-canvas" data-scene-canvas aria-hidden="true"></canvas>
+
+  <!-- Шапка: тонкая, закреплена наверху. Главы — в плавающей навигации внизу -->
+  <header class="site-header" data-header>
+    <a class="brand" href="#top" data-scroll-top aria-label="Завозик — в начало страницы">
+      <img class="brand__logo" src="assets/img/logo-zavozik.png" width="1173" height="387"
+           alt="Завозик. Натуральное молоко ближе к хорошему">
+    </a>
+
+    <!-- Корзина — переключатель (по мотивам Uiverse.io, MuhammadHasann, header.css): в кружке число
+         товаров. Пусто — кружок слева с нулём, надпись справа; есть товары — кружок перекатывается
+         вправо и светится зелёным, надпись — слева (класс is-filled ставит cart.js) -->
+    <button class="cart-button" type="button" data-cart-open data-cart-toggle aria-haspopup="dialog" aria-controls="cart">
+      <span class="cart-button__track" aria-hidden="true">
+        <span class="cart-button__knob">
+          <span class="cart-button__sparkle" style="--s: 2; --deg: 25; --duration: 11"></span>
+          <span class="cart-button__sparkle" style="--s: 1; --deg: 100; --duration: 18"></span>
+          <span class="cart-button__sparkle" style="--s: 1; --deg: 280; --duration: 5"></span>
+          <span class="cart-button__sparkle" style="--s: 2; --deg: 200; --duration: 3"></span>
+          <span class="cart-button__sparkle" style="--s: 2; --deg: 30; --duration: 20"></span>
+          <span class="cart-button__sparkle" style="--s: 2; --deg: 300; --duration: 9"></span>
+          <span class="cart-button__sparkle" style="--s: 1; --deg: 250; --duration: 4"></span>
+          <span class="cart-button__sparkle" style="--s: 2; --deg: 210; --duration: 8"></span>
+          <span class="cart-button__sparkle" style="--s: 2; --deg: 100; --duration: 9"></span>
+          <span class="cart-button__sparkle" style="--s: 1; --deg: 15; --duration: 13"></span>
+          <span class="cart-button__sparkle" style="--s: 1; --deg: 75; --duration: 18"></span>
+          <span class="cart-button__sparkle" style="--s: 2; --deg: 65; --duration: 6"></span>
+          <span class="cart-button__sparkle" style="--s: 2; --deg: 50; --duration: 7"></span>
+          <span class="cart-button__sparkle" style="--s: 1; --deg: 320; --duration: 5"></span>
+          <span class="cart-button__sparkle" style="--s: 1; --deg: 220; --duration: 5"></span>
+          <span class="cart-button__sparkle" style="--s: 1; --deg: 215; --duration: 2"></span>
+          <span class="cart-button__sparkle" style="--s: 2; --deg: 135; --duration: 9"></span>
+          <span class="cart-button__sparkle" style="--s: 2; --deg: 45; --duration: 4"></span>
+          <span class="cart-button__sparkle" style="--s: 1; --deg: 78; --duration: 16"></span>
+          <span class="cart-button__sparkle" style="--s: 1; --deg: 89; --duration: 19"></span>
+          <span class="cart-button__count" data-cart-count data-cart-count-short>0</span>
+        </span>
+        <span class="cart-button__label"><span class="cart-button__text">Корзина</span></span>
+      </span>
+      <span class="visually-hidden">Корзина, товаров: <span data-cart-count>0</span></span>
+    </button>
+  </header>
+
+  <main>
+    <!-- Первый экран по мотивам SPYLT: из пачки «Топлёного молока» без конца льётся струя молока —
+         бесшовная петля (рендер в Blender; запуск и пауза — hero-video.js). На вертикальном экране —
+         вертикальная версия. -->
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="hero__backdrop" aria-hidden="true"></div>
+      <!-- постер — первый кадр ролика, поэтому подмена постера на видео не видна -->
+      <picture class="hero__poster" aria-hidden="true">
+        <source srcset="assets/hero/pour-portrait-poster.webp" media="(orientation: portrait)" width="900" height="1600">
+        <img src="assets/hero/pour-poster.webp" alt="" width="1920" height="1080" fetchpriority="high">
+      </picture>
+      <video class="hero__video" data-hero-video muted loop playsinline preload="none"
+             disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1">
+        <source src="assets/hero/pour-portrait.webm" type="video/webm" media="(orientation: portrait)">
+        <source src="assets/hero/pour-portrait.mp4" type="video/mp4" media="(orientation: portrait)">
+        <source src="assets/hero/pour.webm" type="video/webm">
+        <source src="assets/hero/pour.mp4" type="video/mp4">
+      </video>
+      <!-- заголовок для чтения — постоянный; видимые фразы сменяются (hero-text.js) -->
+      <h1 class="hero__title" id="hero-title">
+        <span class="visually-hidden">Натуральное молоко «Завозик»</span>
+        <span class="hero__phrase" data-hero-phrase aria-hidden="true"><span class="hero__line">Натуральное</span> <span class="hero__line">молоко</span></span>
+      </h1>
+      <div class="hero__aside">
+        <p class="hero__text" data-hero-motto>«Завозик» — молоко, кефир, йогурты и&nbsp;сыры. Ближе к&nbsp;хорошему.</p>
+        <a class="btn btn--light" href="#milk">Смотреть молоко</a>
+      </div>
+      <button class="hero__product" type="button" data-product-open="m02">Топлёное молоко «Завозик», 1&nbsp;л</button>
+      <!-- Программа лояльности: стеклянное «окошко» (по коду карточки с Uiverse.io, Fcodingx) -->
+      <button class="loyalty-card" type="button" data-loyalty>
+        <span class="loyalty-card__bar" aria-hidden="true">
+          <span class="loyalty-card__dot loyalty-card__dot--red"></span>
+          <span class="loyalty-card__dot loyalty-card__dot--yellow"></span>
+          <span class="loyalty-card__dot loyalty-card__dot--green"></span>
+        </span>
+        <span class="loyalty-card__title">Программа лояльности</span>
+        <!-- видно, когда окошко вытягивается при наведении -->
+        <span class="loyalty-card__more">
+          <span class="loyalty-card__text">Цифровое молоко не&nbsp;хуже настоящего!</span>
+          <span class="loyalty-card__try">Попробовать</span>
+        </span>
+      </button>
+    </section>
+
+    <!-- Бегущие строки на стыках разделов (marquee.css, chapters.js): одно слово о марке и символ -->
+    <div class="marquee" data-marquee="Натуральность" data-symbol="leaf" aria-hidden="true"></div>
+
+    <!-- Главы: у каждой — «окно» со сценой из частиц и огромным названием,
+         затем тёмная панель с содержимым поднимается поверх, как горизонт -->
+    <div class="chapters">
+      <section class="chapter" id="who" data-chapter="who" aria-labelledby="who-title">
+        <div class="chapter__stage">
+          <div class="chapter__glow" aria-hidden="true"></div>
+          <!-- Фермер держит шар молока, справа парят стаканы (who-scene.js). Кнопка лежит ровно
+               на шаре (положение — каждый кадр): нажатие наливает молоко в случайный пустой стакан -->
+          <button class="who-pour" type="button" data-who-pour data-cursor="Налить" aria-label="Налить молоко в стакан"></button>
+          <h2 class="chapter__title" id="who-title">Кто мы?</h2>
+          <!-- в правом нижнем углу — сменяющиеся фразы о том, во что верит марка (chapters.js, initMottos) -->
+          <p class="chapter__motto" data-who-motto>Мы делаем то, что сами хотим видеть на&nbsp;своём столе.</p>
+        </div>
+        <div class="chapter__panel">
+          <div class="container">
+            <div class="lead">
+              <p class="lead__head">Натуральное молоко ближе к&nbsp;хорошему</p>
+              <div class="lead__side">
+                <p>«Завозик» — молочная марка. На одной полке у нас то, что хочется каждый день: молоко, кефир, творог и&nbsp;сметана. И то, что хочется попробовать: йогурты с&nbsp;неожиданными вкусами и&nbsp;сыры с&nbsp;характером.</p>
+                <p><a class="link roll" href="#milk">Смотреть молочное</a></p>
+              </div>
+            </div>
+            <ul class="points">
+              <li class="point">
+                <h3 class="point__title">Без консервантов</h3>
+                <p class="point__text">Так написано на наших упаковках. Вкус держится на молоке и&nbsp;честных добавках: ягодах, специях, мёде.</p>
+              </li>
+              <li class="point">
+                <h3 class="point__title">Из натурального молока</h3>
+                <p class="point__text">В основе каждого продукта — молоко: от бутылки на каждый день до&nbsp;сыров к&nbsp;праздничному столу.</p>
+              </li>
+              <li class="point">
+                <h3 class="point__title">Вкус с характером</h3>
+                <p class="point__text">Брусника с&nbsp;чабрецом, какао с&nbsp;морской солью, сыр с&nbsp;кофейной корочкой. Классику любим, но и&nbsp;удивлять не&nbsp;боимся.</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <div class="marquee marquee--reverse" data-marquee="Здоровье" data-symbol="flower" aria-hidden="true"></div>
+
+      <!-- «Производство»: промышленный путь молока — от доильного зала до холодильной камеры.
+           Сцена — молоко течёт по змеевику пастеризатора (scenes.js, buildPipes). Фото — иллюстрации
+           процесса со свободными лицензиями с Wikimedia Commons, авторы и лицензии — в подписях -->
+      <section class="chapter" id="production" data-chapter="production" aria-labelledby="production-title">
+        <div class="chapter__stage">
+          <div class="chapter__glow" aria-hidden="true"></div>
+          <h2 class="chapter__title" id="production-title">Производство</h2>
+        </div>
+        <div class="chapter__panel">
+          <div class="container">
+            <div class="lead">
+              <p class="lead__head">Как молоко становится молоком</p>
+              <div class="lead__side">
+                <p>Между коровой и пачкой в&nbsp;холодильнике — ферма, молоковоз, лаборатория и&nbsp;целый цех: сепараторы, пастеризатор, гомогенизатор, фасовочные автоматы. Так этот путь устроен на современном молочном производстве — по&nbsp;шагам.</p>
+                <p class="price-note">Фотографии — иллюстрации промышленного процесса со свободными лицензиями (Wikimedia Commons), авторы указаны под снимками.</p>
+              </div>
+            </div>
+
+            <ol class="points points--route process">
+              <li class="point">
+                <p class="point__num">01</p>
+                <h3 class="point__title">Ферма</h3>
+                <p class="point__text">Коров доят на&nbsp;доильной карусели. Молоко по&nbsp;закрытым трубам сразу уходит в&nbsp;танк-охладитель и&nbsp;за&nbsp;пару часов остывает до&nbsp;холодильной температуры.</p>
+              </li>
+              <li class="point">
+                <p class="point__num">02</p>
+                <h3 class="point__title">Приёмка</h3>
+                <p class="point__text">Молоковоз-цистерна привозит молоко на&nbsp;завод. Прежде чем его примут, лаборатория проверяет пробу: кислотность, жирность, белок, чистоту.</p>
+              </li>
+              <li class="point">
+                <p class="point__num">03</p>
+                <h3 class="point__title">Очистка и&nbsp;жирность</h3>
+                <p class="point__text">Сепаратор очищает молоко и&nbsp;отделяет сливки. Потом их возвращают ровно столько, сколько нужно продукту: 2,5&nbsp;% для&nbsp;питьевого, 3,2&nbsp;% для&nbsp;топлёного.</p>
+              </li>
+              <li class="point">
+                <p class="point__num">04</p>
+                <h3 class="point__title">Пастеризация</h3>
+                <p class="point__text">Молоко быстро нагревают и&nbsp;сразу охлаждают: вредные микробы погибают, а&nbsp;вкус остаётся молочным. Топлёное молоко, наоборот, долго томят — отсюда кремовый цвет.</p>
+              </li>
+              <li class="point">
+                <p class="point__num">05</p>
+                <h3 class="point__title">Гомогенизация</h3>
+                <p class="point__text">Под высоким давлением жировые шарики дробят на&nbsp;мельчайшие. Сливки больше не&nbsp;всплывают, и&nbsp;вкус ровный от&nbsp;первого глотка до&nbsp;последнего.</p>
+              </li>
+              <li class="point">
+                <p class="point__num">06</p>
+                <h3 class="point__title">Закваска</h3>
+                <p class="point__text">Для кефира, йогуртов, сметаны и&nbsp;творога в&nbsp;молоко вносят закваску — живые культуры, для сыров ещё и&nbsp;фермент. Дальше решает время: у&nbsp;йогурта это часы, у&nbsp;сыра — недели.</p>
+              </li>
+              <li class="point">
+                <p class="point__num">07</p>
+                <h3 class="point__title">Фасовка</h3>
+                <p class="point__text">Автоматы стерилизуют упаковку, наливают продукт и&nbsp;запечатывают пачку. Молоко проходит весь путь по&nbsp;закрытым трубам — руками его не&nbsp;касаются.</p>
+              </li>
+              <li class="point">
+                <p class="point__num">08</p>
+                <h3 class="point__title">Холод</h3>
+                <p class="point__text">Коробки уезжают в&nbsp;холодильную камеру, а&nbsp;оттуда — в&nbsp;доставку. Молоку нужен холод на&nbsp;каждом шаге: это называют холодовой цепью.</p>
+              </li>
+            </ol>
+
+            <!-- Линия обработки в 3D (plant-3d.js): вертеть, приближать, номера — на оборудовании.
+                 Без WebGL остаётся фото с теми же номерами -->
+            <figure class="plant">
+              <div class="plant__frame" data-plant>
+                <img class="plant__photo" src="assets/img/production/line.webp" width="1800" height="1058" loading="lazy" decoding="async"
+                     alt="Линия обработки молока: блок нагрева и охлаждения, гомогенизатор, стерильный танк и фасовочные автоматы">
+                <button class="plant__spot" type="button" data-spot="1" style="--x: 26%; --y: 60%" data-label="Нагрев и охлаждение" aria-label="Показать: нагрев и охлаждение">1</button>
+                <button class="plant__spot" type="button" data-spot="2" style="--x: 45%; --y: 64%" data-label="Гомогенизатор" aria-label="Показать: гомогенизатор">2</button>
+                <button class="plant__spot" type="button" data-spot="3" style="--x: 63%; --y: 35%" data-label="Стерильный танк" aria-label="Показать: стерильный танк">3</button>
+                <button class="plant__spot" type="button" data-spot="4" style="--x: 84%; --y: 28%" data-label="Фасовочные автоматы" aria-label="Показать: фасовочные автоматы">4</button>
+                <button class="plant__reset" type="button" data-plant-reset>Общий вид</button>
+                <p class="plant__hint" aria-hidden="true"><span class="plant__hint-mouse">Поверните линию мышью, приблизьте колесом</span><span class="plant__hint-touch">Поверните линию пальцем, приблизьте двумя пальцами</span></p>
+              </div>
+              <figcaption class="plant__caption">
+                <ol class="plant__legend">
+                  <li><strong>Нагрев и&nbsp;охлаждение.</strong> Трубы и&nbsp;теплообменники: здесь молоко пастеризуют — греют и&nbsp;тут же охлаждают.</li>
+                  <li><strong>Гомогенизатор.</strong> Насос высокого давления, который дробит жировые шарики.</li>
+                  <li><strong>Стерильный танк.</strong> Готовое молоко ждёт фасовки без доступа воздуха.</li>
+                  <li><strong>Фасовочные автоматы.</strong> Формируют пачку, наливают, запечатывают.</li>
+                </ol>
+                <p class="credit">Линия обработки молока: 3D-модель наша, по&nbsp;мотивам иллюстрации Tetra Pak (<a href="https://creativecommons.org/licenses/by-sa/2.0/deed.ru" target="_blank" rel="license noopener">CC BY-SA 2.0</a>, <a href="https://commons.wikimedia.org/wiki/File:Tetra_Pak_processing_equipment_Tetra_Lactenso_Aseptic.jpg" target="_blank" rel="noopener">Wikimedia Commons</a>) — она же показана, если 3D недоступно.</p>
+              </figcaption>
+            </figure>
+
+            <div class="shots">
+              <figure class="shot">
+                <img src="assets/img/production/milking.webp" width="1200" height="930" loading="lazy" decoding="async"
+                     alt="Коровы на доильной карусели, к каждой подключён доильный аппарат">
+                <figcaption class="credit">Доильная карусель. Фото: Ieneach fan ’e Esk, <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ru" target="_blank" rel="license noopener">CC BY-SA 4.0</a>, <a href="https://commons.wikimedia.org/wiki/File:Dairy_Campus_Ljouwert15.jpg" target="_blank" rel="noopener">Wikimedia Commons</a>, уменьшено.</figcaption>
+              </figure>
+              <figure class="shot">
+                <img src="assets/img/production/packing.webp" width="722" height="480" loading="lazy" decoding="async"
+                     alt="Цех фасовки молочного завода: конвейеры, фасовочные автоматы, коробки с упаковками">
+                <figcaption class="credit">Цех фасовки. Фото: Peter Tittenberger, <a href="https://creativecommons.org/licenses/by/3.0/deed.ru" target="_blank" rel="license noopener">CC BY 3.0</a>, <a href="https://commons.wikimedia.org/wiki/File:Mengniu-production-line.jpg" target="_blank" rel="noopener">Wikimedia Commons</a>.</figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="marquee" data-marquee="Качество" data-symbol="leaf" aria-hidden="true"></div>
+
+      <section class="chapter" id="milk" data-chapter="milk" aria-labelledby="milk-title">
+        <div class="chapter__stage">
+          <div class="chapter__glow" aria-hidden="true"></div>
+          <h2 class="chapter__title" id="milk-title">Молоко</h2>
+        </div>
+        <div class="chapter__panel">
+          <div class="container">
+            <div class="lead">
+              <p class="lead__head">Молоко, кефир, йогурты и&nbsp;напитки</p>
+              <div class="lead__side">
+                <p>16 продуктов: восемь на каждый день и&nbsp;восемь с&nbsp;характером — от&nbsp;гречки с&nbsp;мёдом до&nbsp;облепихи.</p>
+                <p class="loupe-note">Наведите курсор на&nbsp;фото — под лупой видно, из&nbsp;чего продукт состоит: лактоза, молочный жир, живые культуры и&nbsp;то, что даёт ему вкус и&nbsp;цвет.</p>
+                <p class="price-note">Цены указаны для примера. Скидка товаров недели уже учтена в&nbsp;цене.</p>
+              </div>
+            </div>
+            <article class="spotlight" data-spotlight="milk" aria-label="Товар недели: молочное"></article>
+            <div class="shelf">
+              <h3 class="shelf__title">Каждый день</h3>
+              <ul class="shelf__grid" data-catalog="milk" data-shelf="daily" aria-label="Молоко на каждый день"></ul>
+            </div>
+            <div class="shelf">
+              <h3 class="shelf__title">С характером</h3>
+              <ul class="shelf__grid" data-catalog="milk" data-shelf="bold" aria-label="Молочное с характером"></ul>
+            </div>
+            <noscript><p class="price-note">Каталог и корзина работают с включённым JavaScript.</p></noscript>
+          </div>
+        </div>
+      </section>
+
+      <div class="marquee marquee--reverse" data-marquee="Забота" data-symbol="flower" aria-hidden="true"></div>
+
+      <section class="chapter" id="cheese" data-chapter="cheese" aria-labelledby="cheese-title">
+        <div class="chapter__stage">
+          <div class="chapter__glow" aria-hidden="true"></div>
+          <h2 class="chapter__title" id="cheese-title">Сыры</h2>
+        </div>
+        <div class="chapter__panel">
+          <div class="container">
+            <div class="lead">
+              <p class="lead__head">От простого сыра до&nbsp;бурраты</p>
+              <div class="lead__side">
+                <p>9 сыров: полутвёрдый на каждый день, сливочный, буррата и&nbsp;сыры с&nbsp;ягодами, специями и&nbsp;кофе.</p>
+                <p class="loupe-note">Под лупой у&nbsp;каждого сыра свой состав: сетка казеина, соль, ароматы копчёной паприки, кофе, клубники и&nbsp;базилика.</p>
+                <p class="price-note">Цены указаны для примера.</p>
+              </div>
+            </div>
+            <article class="spotlight" data-spotlight="cheese" aria-label="Товар недели: сыр"></article>
+            <div class="shelf">
+              <h3 class="shelf__title">Классика</h3>
+              <ul class="shelf__grid" data-catalog="cheese" data-shelf="daily" aria-label="Классические сыры"></ul>
+            </div>
+            <div class="shelf">
+              <h3 class="shelf__title">С характером</h3>
+              <ul class="shelf__grid" data-catalog="cheese" data-shelf="bold" aria-label="Сыры с характером"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="marquee" data-marquee="Экология" data-symbol="leaf" aria-hidden="true"></div>
+
+      <section class="chapter" id="delivery" data-chapter="delivery" aria-labelledby="delivery-title">
+        <div class="chapter__stage">
+          <div class="chapter__glow" aria-hidden="true"></div>
+          <!-- Брендированные дроны-доставщики над дорогой: шесть, по три с каждой стороны, симметрично —
+               пара у самого кадра, пара дальше (летят впереди) и пара ещё дальше. Здесь один дрон,
+               остальные пять — его копии (chapters.js, initDrones); градиенты — в спрайте в начале body -->
+          <div class="drones" data-drones aria-hidden="true">
+          <div class="drone drone--near drone--left" data-drone>
+            <div class="drone__float">
+              <svg class="drone__svg" viewBox="0 0 320 250" focusable="false">
+                <!-- задние винты — дальше и бледнее -->
+                <g class="drone__rotor drone__rotor--back" transform="translate(84 30)">
+                  <ellipse class="drone__disc" rx="40" ry="5" fill="url(#drone-disc)"/>
+                  <rect class="drone__blade" x="-38" y="-1.6" width="76" height="3.2" rx="1.6"/>
+                  <rect class="drone__blade drone__blade--b" x="-38" y="-1.6" width="76" height="3.2" rx="1.6"/>
+                </g>
+                <g class="drone__rotor drone__rotor--back" transform="translate(236 30)">
+                  <ellipse class="drone__disc" rx="40" ry="5" fill="url(#drone-disc)"/>
+                  <rect class="drone__blade" x="-38" y="-1.6" width="76" height="3.2" rx="1.6"/>
+                  <rect class="drone__blade drone__blade--b" x="-38" y="-1.6" width="76" height="3.2" rx="1.6"/>
+                </g>
+                <path d="M104 62 L84 36 M216 62 L236 36" stroke="#2a3122" stroke-width="5" stroke-linecap="round"/>
+                <rect x="77" y="32" width="14" height="8" rx="3" fill="url(#drone-dark)"/>
+                <rect x="229" y="32" width="14" height="8" rx="3" fill="url(#drone-dark)"/>
+    
+                <!-- лучи к передним моторам -->
+                <path d="M108 66 C 84 64, 66 58, 48 50" stroke="url(#drone-dark)" stroke-width="8" stroke-linecap="round" fill="none"/>
+                <path d="M212 66 C 236 64, 254 58, 272 50" stroke="url(#drone-dark)" stroke-width="8" stroke-linecap="round" fill="none"/>
+                <path d="M104 63 C 84 61, 67 55, 50 47.5" stroke="#8dbf5b" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.9"/>
+                <path d="M216 63 C 236 61, 253 55, 270 47.5" stroke="#8dbf5b" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.9"/>
+    
+                <!-- моторы -->
+                <g transform="translate(48 50)">
+                  <rect x="-11" y="-8" width="22" height="16" rx="5" fill="url(#drone-dark)"/>
+                  <rect x="-11" y="-2.5" width="22" height="3" fill="#8dbf5b"/>
+                  <circle class="drone__led" cx="0" cy="6" r="2.2" fill="#b8e08f"/>
+                </g>
+                <g transform="translate(272 50)">
+                  <rect x="-11" y="-8" width="22" height="16" rx="5" fill="url(#drone-dark)"/>
+                  <rect x="-11" y="-2.5" width="22" height="3" fill="#8dbf5b"/>
+                  <circle class="drone__led drone__led--late" cx="0" cy="6" r="2.2" fill="#b8e08f"/>
+                </g>
+    
+                <!-- передние винты -->
+                <g class="drone__rotor" transform="translate(48 38)">
+                  <ellipse class="drone__disc" rx="50" ry="6.5" fill="url(#drone-disc)"/>
+                  <rect class="drone__blade" x="-47" y="-2" width="94" height="4" rx="2"/>
+                  <rect class="drone__blade drone__blade--b" x="-47" y="-2" width="94" height="4" rx="2"/>
+                  <rect x="-4" y="-2" width="8" height="8" rx="2.5" fill="#2a3122"/>
+                </g>
+                <g class="drone__rotor" transform="translate(272 38)">
+                  <ellipse class="drone__disc" rx="50" ry="6.5" fill="url(#drone-disc)"/>
+                  <rect class="drone__blade" x="-47" y="-2" width="94" height="4" rx="2"/>
+                  <rect class="drone__blade drone__blade--b" x="-47" y="-2" width="94" height="4" rx="2"/>
+                  <rect x="-4" y="-2" width="8" height="8" rx="2.5" fill="#2a3122"/>
+                </g>
+    
+                <!-- корпус -->
+                <path d="M100 70 C 100 50, 120 44, 160 44 C 200 44, 220 50, 220 70 C 220 88, 204 96, 160 96 C 116 96, 100 88, 100 70 Z" fill="url(#drone-shell)"/>
+                <path d="M104 80 C 116 92, 136 96, 160 96 C 184 96, 204 92, 216 80 C 208 90, 190 99, 160 99 C 130 99, 112 90, 104 80 Z" fill="url(#drone-dark)"/>
+                <path d="M103 74 C 130 80, 190 80, 217 74" stroke="#8dbf5b" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M118 52 C 135 47, 185 47, 202 52" stroke="#ffffff" stroke-width="2.4" fill="none" stroke-linecap="round" opacity="0.9"/>
+                <image href="assets/img/logo-zavozik.png" x="126" y="51.5" width="68" height="22.4" preserveAspectRatio="xMidYMid meet"/>
+                <circle cx="160" cy="88" r="6.5" fill="url(#drone-lens)" stroke="#2a3122" stroke-width="1.5"/>
+                <circle cx="158" cy="86" r="1.6" fill="#ffffff" opacity="0.85"/>
+    
+                <!-- шасси -->
+                <path d="M132 96 L122 116 M188 96 L198 116" stroke="#2a3122" stroke-width="3.2" stroke-linecap="round"/>
+                <path d="M114 117 H130 M190 117 H206" stroke="#2a3122" stroke-width="3.2" stroke-linecap="round"/>
+    
+                <!-- трос и пакет с продуктами: качается маятником -->
+                <g class="drone__cargo">
+                  <path d="M160 99 V132" stroke="#2a3122" stroke-width="1.6"/>
+                  <path d="M155 131 h10 v4 a5 5 0 0 1 -10 0 z" fill="#2a3122"/>
+                  <path d="M143 150 C 144 138, 152 134, 160 136 C 168 134, 176 138, 177 150" stroke="#b9a37c" stroke-width="2.4" fill="none"/>
+                  <!-- из пакета выглядывают бутылка молока и кусок сыра -->
+                  <path d="M146 152 L147 141 C 147 138, 150 136, 153 136 L155 136 C 158 136, 160 138, 160 141 L161 152 Z" fill="#fbfbf6" stroke="#dcd7c6" stroke-width="0.8"/>
+                  <rect x="148.5" y="131" width="10" height="6" rx="1.6" fill="#2f6b33"/>
+                  <path d="M164 152 L170 139 L181 152 Z" fill="#f2c94c" stroke="#d9ab2c" stroke-width="0.8"/>
+                  <circle cx="171" cy="147" r="1.4" fill="#d9ab2c"/>
+                  <circle cx="175" cy="149.5" r="1" fill="#d9ab2c"/>
+                  <path d="M134 150 H186 L181 214 C 181 217, 179 219, 176 219 H144 C 141 219, 139 217, 139 214 Z" fill="url(#drone-stripes)"/>
+                  <path d="M134 150 H186 L181 214 C 181 217, 179 219, 176 219 H144 C 141 219, 139 217, 139 214 Z" fill="url(#drone-bag-shade)" stroke="#3f6b27" stroke-width="1"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+          </div>
+          <!-- Слова о доставке вылетают из глубины над дорогой и подлетают к зрителю; в конце —
+               логотип, он держится 15 секунд (chapters.js, initFlyby) -->
+          <div class="flyby" data-flyby aria-hidden="true">
+            <span class="flyby__item">Быстро</span>
+            <span class="flyby__item">Удобно</span>
+            <span class="flyby__item">Везде</span>
+            <span class="flyby__item">Всегда</span>
+            <img class="flyby__item flyby__logo" src="assets/img/logo-zavozik.png" alt="" width="1173" height="387" loading="lazy" decoding="async">
+          </div>
+          <h2 class="chapter__title" id="delivery-title">Доставка</h2>
+        </div>
+        <div class="chapter__panel">
+          <div class="container">
+            <div class="lead">
+              <p class="lead__head">Как молоко доезжает до вас</p>
+              <div class="lead__side">
+                <p>Молоко — продукт нежный: ему важны холод, аккуратность и&nbsp;время в&nbsp;пути. Поэтому доставка для нас — такой же шаг производства, как пастеризация или фасовка, последний перед вашим завтраком.</p>
+                <p><a class="link roll" href="#production">Как делают молоко</a></p>
+              </div>
+            </div>
+            <ol class="points points--route">
+              <li class="point">
+                <h3 class="point__title">В холоде</h3>
+                <p class="point__text">Молочные продукты везут охлаждёнными — холодовая цепь не&nbsp;должна прерываться от&nbsp;камеры завода до&nbsp;вашего холодильника.</p>
+              </li>
+              <li class="point">
+                <h3 class="point__title">Бережно</h3>
+                <p class="point__text">Бутылки, банки и&nbsp;пачки едут в&nbsp;коробках, чтобы доехать целыми, а&nbsp;буррата — не&nbsp;помятой.</p>
+              </li>
+              <li class="point">
+                <h3 class="point__title">Дома</h3>
+                <p class="point__text">Уберите покупки в&nbsp;холодильник сразу. Срок годности и&nbsp;как хранить продукт после вскрытия — на&nbsp;каждой упаковке.</p>
+              </li>
+              <li class="point">
+                <h3 class="point__title">Условия</h3>
+                <p class="point__text">Зоны, сроки и&nbsp;стоимость доставки появятся вместе с&nbsp;оформлением заказа. Пока на&nbsp;сайте можно собрать корзину и&nbsp;посчитать сумму.</p>
+              </li>
+            </ol>
+          </div>
+          <footer class="site-footer">
+            <div class="container site-footer__inner">
+              <p>© 2026 «Завозик»</p>
+              <p class="site-footer__note">Цены на&nbsp;сайте указаны для примера, оплата пока не&nbsp;подключена.</p>
+              <p><a class="link roll" href="index.html">Посмотреть заставку ещё раз</a></p>
+              <p><a class="link roll" href="#top">Наверх</a></p>
+            </div>
+          </footer>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Плавающая навигация по разделам: видна, когда первый экран прокручен -->
+  <nav class="pill-nav" data-pill aria-label="Быстрый переход по разделам">
+    <ul class="pill-nav__menu" id="pill-menu" data-pill-menu hidden>
+      <li><a class="roll" href="#who">Кто мы?</a></li>
+      <li><a class="roll" href="#production">Производство</a></li>
+      <li><a class="roll" href="#milk">Молоко</a></li>
+      <li><a class="roll" href="#cheese">Сыры</a></li>
+      <li><a class="roll" href="#delivery">Доставка</a></li>
+    </ul>
+    <button class="pill-nav__toggle" type="button" data-pill-toggle aria-expanded="false" aria-controls="pill-menu">
+      <span class="visually-hidden">Сейчас раздел: </span>
+      <span class="pill-nav__current" data-pill-current>Кто мы?</span>
+      <span class="pill-nav__count" data-pill-count>1 из 5</span>
+      <svg class="pill-nav__chevron" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M3 7.5l3-3 3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </nav>
+
+  <!-- Подпись у курсора над товарами (только мышь) -->
+  <div class="cursor-label" data-cursor-label aria-hidden="true">Открыть</div>
+
+  <!-- Карточка товара: фото, описание, что указано на упаковке, цена -->
+  <dialog class="product-dialog" id="product-dialog" aria-labelledby="pd-title" data-product-dialog>
+    <div class="product-dialog__scrim" data-pd-close aria-hidden="true"></div>
+    <article class="product-dialog__panel">
+      <button class="icon-button product-dialog__close" type="button" data-pd-close aria-label="Закрыть карточку товара">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <div class="product-dialog__media">
+        <img data-pd-image src="" width="600" height="750" alt="">
+        <span class="sticker" data-pd-deal hidden></span>
+      </div>
+      <div class="product-dialog__info">
+        <p class="product-dialog__kind" data-pd-kind></p>
+        <h2 class="product-dialog__title" id="pd-title" data-pd-title></h2>
+        <p class="product-dialog__text" data-pd-text></p>
+        <dl class="product-dialog__facts" data-pd-facts></dl>
+        <p class="product-dialog__tips"><span>С чем сочетать</span> <span data-pd-tips></span></p>
+        <div class="product-dialog__marks" data-pd-marks-wrap>
+          <p class="product-dialog__label">На упаковке</p>
+          <ul class="marks" data-pd-marks></ul>
+        </div>
+        <p class="product-dialog__storage">Хранить в холодильнике. Срок годности и полный состав — на упаковке.</p>
+        <div class="product-dialog__buy">
+          <p class="product-dialog__price" data-pd-price></p>
+          <button class="buy-button" type="button" data-pd-add>
+            <span class="buy-button__label">В корзину</span>
+            <svg class="buy-button__star buy-button__star--1" viewBox="0 0 784.11 815.53" aria-hidden="true" focusable="false"><use href="#buy-star"/></svg>
+            <svg class="buy-button__star buy-button__star--2" viewBox="0 0 784.11 815.53" aria-hidden="true" focusable="false"><use href="#buy-star"/></svg>
+            <svg class="buy-button__star buy-button__star--3" viewBox="0 0 784.11 815.53" aria-hidden="true" focusable="false"><use href="#buy-star"/></svg>
+            <svg class="buy-button__star buy-button__star--4" viewBox="0 0 784.11 815.53" aria-hidden="true" focusable="false"><use href="#buy-star"/></svg>
+            <svg class="buy-button__star buy-button__star--5" viewBox="0 0 784.11 815.53" aria-hidden="true" focusable="false"><use href="#buy-star"/></svg>
+            <svg class="buy-button__star buy-button__star--6" viewBox="0 0 784.11 815.53" aria-hidden="true" focusable="false"><use href="#buy-star"/></svg>
+          </button>
+        </div>
+        <p class="product-dialog__incart" data-pd-incart hidden></p>
+      </div>
+    </article>
+  </dialog>
+
+  <!-- Корзина: боковая панель -->
+  <dialog class="cart" id="cart" aria-labelledby="cart-title" data-cart>
+    <div class="cart__scrim" data-cart-close aria-hidden="true"></div>
+    <div class="cart__panel">
+      <header class="cart__head">
+        <h2 class="cart__title" id="cart-title">Корзина</h2>
+        <button class="icon-button" type="button" data-cart-close aria-label="Закрыть корзину">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </header>
+
+      <div class="cart__body">
+        <ul class="cart__list" data-cart-list aria-label="Товары в корзине"></ul>
+
+        <div class="cart__empty" data-cart-empty>
+          <p class="cart__empty-title">Корзина пуста</p>
+          <p class="cart__empty-text">Добавьте молоко или сыр из&nbsp;каталога. В&nbsp;начале каждого раздела&nbsp;— товар недели со&nbsp;скидкой.</p>
+          <a class="btn" href="#milk" data-cart-goto>Перейти к молоку</a>
+        </div>
+      </div>
+
+      <footer class="cart__foot" data-cart-foot>
+        <p class="cart__total"><span>Итого</span> <strong data-cart-total>0 ₽</strong></p>
+        <!-- бонусы из игры «Молочная ферма» (farm-loader.js): до 10 % заказа -->
+        <div class="cart__bonus" data-cart-bonus hidden>
+          <p><span>Бонусы из игры</span> <strong data-bonus-use>−0 ₽</strong></p>
+          <p class="cart__bonus-total"><span>С бонусами</span> <strong data-bonus-total>0 ₽</strong></p>
+          <p class="cart__bonus-note" data-bonus-note></p>
+        </div>
+        <p class="cart__note">Оформление заказа и оплата пока не подключены. Цены указаны для примера.</p>
+        <button class="btn btn--ghost cart__clear" type="button" data-cart-clear>Очистить корзину</button>
+      </footer>
+    </div>
+  </dialog>
+
+  <div class="visually-hidden" aria-live="polite" aria-atomic="true" data-announcer></div>
+</body>
+</html>

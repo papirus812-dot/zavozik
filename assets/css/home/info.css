@@ -1,0 +1,74 @@
+/* «Кто мы?», «Производство» и «Доставка»: короткие пункты сеткой; у этапов — точки на линии. */
+
+/* ---------- Пункты сеткой ---------- */
+.points {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 40px clamp(20px, 3vw, 48px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.point {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.point__title {
+  margin: 0;
+  font-size: clamp(22px, 1.8vw, 27px);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.point__text {
+  max-width: 34ch;
+  color: var(--text-dim);
+  font-size: clamp(17px, 1.3vw, 19px);
+  line-height: 1.5;
+}
+
+/* этапы идут по порядку — точки на одной линии, как остановки маршрута */
+.points--route {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 0;
+}
+
+.points--route .point {
+  position: relative;
+  padding-right: clamp(16px, 2.4vw, 36px);
+  border-top-color: var(--line-strong);
+}
+
+.points--route .point::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+@media (max-width: 900px) {
+  .points,
+  .points--route {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .points--route {
+    column-gap: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .points {
+    grid-template-columns: 1fr;
+  }
+}

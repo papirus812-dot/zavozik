@@ -1,0 +1,12 @@
+# Исходные фото упаковок (PNG, ~55 МБ) — на сайте стоят сжатые копии из assets/products
+milk/
+cheese/
+
+# Старое фоновое видео и исходник логотипа — сайт их больше не подключает
+assets/video/
+assets/img/logo-zavozik-original.png
+
+# Системные файлы
+Thumbs.db
+desktop.ini
+.DS_Store

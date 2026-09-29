@@ -1,0 +1,306 @@
+/* «Производство»: восемь шагов пути молока (как остановки маршрута — info.css, .points--route),
+   линия обработки с номерами прямо на оборудовании и два снимка — ферма и цех фасовки.
+   Снимки — со свободными лицензиями, подписи с автором и лицензией стоят под каждым. */
+
+.process {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  row-gap: clamp(40px, 5vw, 64px);
+  margin-bottom: clamp(56px, 8vw, 110px);
+}
+
+.point__num {
+  color: var(--accent-hot);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- Линия обработки ---------- */
+.plant {
+  margin: 0 0 clamp(40px, 6vw, 80px);
+}
+
+/* иллюстрация на белом — как фото товаров в каталоге */
+.plant__frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  background: #fff;
+}
+
+.plant__frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* 3D (plant-3d.js): холст во всю рамку, фото — только запасное */
+.plant__frame.is-3d {
+  aspect-ratio: 16 / 9;
+}
+
+.plant__frame.is-3d .plant__photo {
+  display: none;
+}
+
+.plant__canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+}
+
+.plant__canvas:active {
+  cursor: grabbing;
+}
+
+@media (max-width: 760px) {
+  .plant__frame.is-3d {
+    aspect-ratio: 1 / 1;
+  }
+}
+
+/* номер на оборудовании; при наведении — подпись, нажатие — камера подлетает к узлу */
+.plant__spot {
+  position: absolute;
+  z-index: 2;
+  left: var(--x);
+  top: var(--y);
+  display: grid;
+  place-items: center;
+  width: clamp(28px, 2.6vw, 38px);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: 600 clamp(13px, 1.1vw, 16px)/1 var(--font-ui);
+  box-shadow: 0 0 0 6px rgba(var(--accent-rgb), 0.28), 0 6px 18px rgba(0, 0, 0, 0.25);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  animation: plant-pulse 2.8s ease-in-out infinite;
+}
+
+.plant__spot[hidden] {
+  display: none;
+}
+
+.plant__spot:focus-visible {
+  outline: 2px solid #13190f;
+  outline-offset: 3px;
+}
+
+.plant__spot.is-active {
+  background: var(--accent-hot);
+}
+
+.plant__spot.is-active::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* «Общий вид» и подсказка — только в 3D */
+.plant__reset {
+  position: absolute;
+  z-index: 3;
+  top: 16px;
+  right: 16px;
+  display: none;
+  padding: 9px 16px;
+  border: 1px solid rgba(19, 25, 15, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  color: #13190f;
+  font: 500 14px/1 var(--font-ui);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.plant__reset:hover {
+  background: #fff;
+}
+
+.plant__hint {
+  position: absolute;
+  z-index: 3;
+  left: 18px;
+  bottom: 14px;
+  display: none;
+  color: #5f665d;
+  font-size: 13px;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.plant__frame.is-3d .plant__reset,
+.plant__frame.is-3d .plant__hint {
+  display: block;
+}
+
+.plant__frame.is-touched .plant__hint {
+  opacity: 0;
+}
+
+.plant__hint-touch {
+  display: none;
+}
+
+@media (hover: none) {
+  .plant__hint-mouse {
+    display: none;
+  }
+
+  .plant__hint-touch {
+    display: inline;
+  }
+}
+
+.plant__spot:nth-of-type(2) { animation-delay: -0.7s; }
+.plant__spot:nth-of-type(3) { animation-delay: -1.4s; }
+.plant__spot:nth-of-type(4) { animation-delay: -2.1s; }
+
+.plant__spot::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #13190f;
+  color: #fff;
+  font: 500 13px/1 var(--font-ui);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .plant__frame:hover .plant__spot::after {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes plant-pulse {
+  0%, 100% { box-shadow: 0 0 0 6px rgba(var(--accent-rgb), 0.28), 0 6px 18px rgba(0, 0, 0, 0.25); }
+  50% { box-shadow: 0 0 0 12px rgba(var(--accent-rgb), 0.08), 0 6px 18px rgba(0, 0, 0, 0.25); }
+}
+
+.plant__caption {
+  display: grid;
+  gap: 18px;
+  margin-top: 22px;
+}
+
+.plant__legend {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px clamp(20px, 3vw, 44px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: plant;
+}
+
+.plant__legend li {
+  position: relative;
+  padding-left: 34px;
+  color: var(--text-dim);
+  font-size: 14.5px;
+  line-height: 1.5;
+  counter-increment: plant;
+}
+
+.plant__legend li::before {
+  content: counter(plant);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: 600 12px/1 var(--font-ui);
+}
+
+.plant__legend strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* ---------- Ферма и цех фасовки ---------- */
+.shots {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: clamp(16px, 2.4vw, 32px);
+  align-items: start;
+}
+
+.shot {
+  margin: 0;
+}
+
+.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border-radius: 22px;
+}
+
+/* подпись снимка: что на нём, автор, лицензия, источник */
+.credit {
+  margin-top: 12px;
+  color: var(--text-faint);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.credit a {
+  color: var(--text-dim);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.25);
+  text-underline-offset: 2px;
+}
+
+.credit a:hover {
+  color: var(--text);
+}
+
+@media (max-width: 900px) {
+  .process,
+  .plant__legend {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shots {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .process,
+  .plant__legend {
+    grid-template-columns: 1fr;
+  }
+
+  .plant__frame {
+    border-radius: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plant__spot {
+    animation: none;
+  }
+}
